@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storix — Apple-style Scroll Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="apple-scroll.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+<body>
+<div class="hdr">
+  <div class="brand">Storix</div>
+  <nav class="menu">
+    <a href="about.html"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>About</a>
+    <a href="product.html"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4v 6l-9 4-9-4v-6z"/></svg>Product</a>
+    <a href="purchase.html"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 7V6a5 5 0 0110 0v1h2a1 1 0 011 1l-1.2 12a2 2 0 01-2 1.8H8.2a2 2 0 01-2-1.8L5 8a1  1 0 011-1h1zm2 0h6V6a3 3 0 00-6 0v1z"/></svg>Product Lineup</a>
+  </nav>
+</div>
+
+<section class="scene scene--logo">
+  <div class="pin">
+    <div class="frame">
+      <div class="content">
+        <div class="logo-wrap">
+          <div class="logo-top">Slauting frontline energy workers, Improving energy efficiency</div>
+          <div class="logo-name">STORIX</div>
+          <div class="logo-bottom">At Storix, we are committed to improving energy efficiency through our innovative solutions.</div>
+          <a class="ghost-btn" href="about.html">About Us</a>
+        </div>
+        <div class="hero-visual">
+          <img src="image/pexels-hi-u-nguy-n-1597509210-35344736.jpg" alt="Energy infrastructure">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="presence" class="scene scene--presence">
+  <div class="pin">
+    <div class="frame">
+      <div class="content">
+        <div class="hero-visual"></div>
+        <div>
+          <div class="title">A little of a lot is still a lot</div>
+          <div class="copy">
+            Every year <strong>2320&nbsp;TWh</strong> of energy is lost during the transmission and distribution process.<br>
+            That’s enough energy to sustain <strong>211&nbsp;million</strong> households for a year!
+          </div>
+          <div class="copy" style="margin-top:12px">
+            We as Storix improve efficiency slightly, helping to save <strong>1,478.828&nbsp;MWh</strong> per <strong>2&nbsp;million</strong> households.
+          </div>
+          <div style="margin-top:16px">
+            <a class="ghost-btn" href="product.html">Find Out How</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="energy-hub" class="scene scene--hub">
+  <div class="pin">
+    <div class="frame">
+      <div class="content">
+        <div>
+          <div class="title">Global Energy Hub</div>
+          <div class="copy">
+            Connecting the world through efficient energy distribution.<br>
+            Our primary operation center is located in the heart of innovation.
+          </div>
+          <div class="stat" style="margin-top: 24px;">
+            <div class="item">
+              <div class="label" style="font-size: 12px; color: #94a3b8;">Location</div>
+              <div class="value" style="font-size: 18px;">Shanghai</div>
+            </div>
+            <div class="item">
+              <div class="label" style="font-size: 12px; color: #94a3b8;">Coordinates</div>
+              <div class="value" style="font-size: 18px;">31.23° N</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual" id="map-container" style="z-index: 1;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">© <span id="year"></span> Storix</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if map container exists
+    const mapContainer = document.getElementById('map-container');
+    if (mapContainer) {
+        const map = L.map('map-container', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([31.2304, 121.4737], 13);
+        
+        // Dark mode tiles (CartoDB Dark Matter)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // Custom Icon for Storix
+        const storixIcon = L.divIcon({
+            className: 'storix-marker',
+            html: '<div style="background-color: #1F7A8C; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(31, 122, 140, 0.4); position: relative;"><div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); background: #1F7A8C; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; white-space: nowrap;">STORIX</div></div>',
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+        });
+
+        L.marker([31.2304, 121.4737], { icon: storixIcon }).addTo(map)
+            .bindPopup('<b>Storix Energy Hub</b><br>Shanghai, China');
+    }
+});
+</script>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+<script src="apple-scroll.js"></script>
+</body>
+</html>

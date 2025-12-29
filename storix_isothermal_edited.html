@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storix Energy Saving Simulator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load Simulation Data -->
+    <script>
+    const SIM_DATA = {
+  "hours": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "baseline_household_kw": [
+    0.5179,
+    0.6539,
+    0.3404,
+    0.2694,
+    0.3469,
+    0.268,
+    0.8976,
+    2.3629,
+    2.9729,
+    1.9952,
+    1.4271,
+    3.9708,
+    1.4308,
+    0.5538,
+    1.6954,
+    1.2912,
+    0.6835,
+    1.8244,
+    3.3644,
+    3.1902,
+    2.9339,
+    1.6947,
+    0.8519,
+    0.3761
+  ],
+  "optimized_household_kw": [
+    1.486321052631582,
+    1.4960052631578973,
+    1.4877684210526343,
+    1.49045263157895,
+    1.4942684210526342,
+    1.4890526315789498,
+    1.487073684210528,
+    1.562900000000007,
+    1.5629000000000204,
+    1.5551999999999997,
+    1.4902578947368423,
+    1.5608000000000417,
+    1.4939578947368424,
+    1.4906421052631607,
+    1.5554,
+    1.4912000000000005,
+    1.4940263157894762,
+    1.5543999999999998,
+    1.5544000000000284,
+    1.560200000000025,
+    1.5639000000000194,
+    1.5547,
+    1.4940052631578966,
+    1.4918894736842132
+  ],
+  "scale_transmission": 2000000,
+  "scale_distribution": 5000,
+  "line_params": {
+    "transmission": {
+      "voltage_kv": 750,
+      "name": "LGJ-300/25 ACSR",
+      "resistance_dc_20_per_km_single": 0.03,
+      "num_bundle": 2,
+      "diameter_mm": 23.94,
+      "emissivity": 0.5,
+      "absorptivity": 0.5
+    },
+    "distribution": {
+      "voltage_kv": 10,
+      "name": "JKLYJ-10/240",
+      "resistance_dc_20_per_km": 0.118,
+      "diameter_mm": 22.0,
+      "emissivity": 0.9,
+      "absorptivity": 0.9
+    }
+  }
+};
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .metric-value { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+        .metric-label { font-size: 0.875rem; color: #64748b; }
+        .highlight-green { color: #10b981; }
+        .highlight-red { color: #ef4444; }
+    </style>
+</head>
+<body class="p-6 max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-800">Storix Isothermal Simulator</h1>
+        <p class="text-slate-500 mt-2">Experimental Mode: Regulating Load to Maintain Constant Conductor Temperature</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="card bg-white p-6 rounded-lg shadow-sm mb-6">
+        <h3 class="text-lg font-semibold text-slate-800 mb-4">📍 Location & Weather Data</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700">Search City</label>
+                <div class="flex mt-1">
+                    <input type="text" id="cityInput" placeholder="e.g. London, Tokyo, New York" class="flex-1 rounded-l-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                    <button onclick="fetchWeatherData()" class="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 font-bold">
+                        Fetch Weather
+                    </button>
+                </div>
+                <p id="locationStatus" class="text-sm text-slate-500 mt-1">Enter a city to load real-time forecast data.</p>
+            </div>
+            
+            <div class="bg-slate-50 p-3 rounded border text-sm">
+                <p class="font-semibold text-slate-700">Current Forecast Data:</p>
+                <div id="weatherSummary" class="mt-1 text-slate-600">
+                    Using default constant values.
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Grid Scale (Households)</label>
+                <div class="flex items-center gap-2">
+                    <input type="range" id="gridScaleInput" min="10000" max="20000000" step="10000" value="2000000" class="mt-1 flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="document.getElementById('gridScaleVal').innerText = (this.value/1000000).toFixed(2) + ' M'; updateSimulation()">
+                    <span id="gridScaleVal" class="text-sm font-bold text-slate-700 w-16">2.00 M</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Range: 10k - 20M Households</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Battery Capacity (kWh)</label>
+                <div class="flex items-center gap-2">
+                    <input type="range" id="batteryCapInput" min="5" max="100" step="0.5" value="15" class="mt-1 flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="document.getElementById('batteryCapVal').innerText = this.value + ' kWh'; updateSimulation()">
+                    <span id="batteryCapVal" class="text-sm font-bold text-slate-700 w-16">15 kWh</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Per household. 95% efficiency.</p>
+                <div class="mt-2 flex items-center gap-2">
+                    <button onclick="findOptimalBatteryCapacity()" class="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 font-semibold">Find Optimal Size</button>
+                    <span id="optimalCapVal" class="text-sm text-slate-700"></span>
+                </div>
+            </div>
+
+            <div class="md:col-span-4">
+                 <button onclick="updateSimulation()" class="w-full bg-slate-200 text-slate-700 p-2 rounded-md hover:bg-slate-300 font-semibold">
+                    Re-Run Simulation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Visualization -->
+    <div class="card bg-white p-8 rounded-lg shadow-sm mb-6 overflow-hidden">
+        <h3 class="text-lg font-semibold text-slate-800 mb-8">System Visualization & Savings Breakdown</h3>
+        
+        <div class="relative flex items-center justify-between min-w-[600px]">
+            <!-- Connecting Line Background -->
+            <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2"></div>
+
+            <!-- Node 1: Power Plant -->
+            <div class="flex flex-col items-center bg-white px-2 z-10">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-3xl shadow-sm border border-slate-200 mb-2">
+                    🏭
+                </div>
+                <div class="font-bold text-slate-800">Power Plant</div>
+                <div class="text-xs text-slate-500">Source</div>
+            </div>
+
+            <!-- Link 1: Transmission -->
+            <div class="flex-1 flex flex-col items-center px-4">
+                <div class="bg-blue-50 border border-blue-100 rounded px-3 py-1 mb-2 text-center shadow-sm w-full max-w-[200px]">
+                    <div class="text-xs font-semibold text-blue-800 uppercase tracking-wider">Transmission Line</div>
+                    <div class="text-lg font-bold text-green-600" id="vizTransSavings">0 kWh</div>
+                    <div class="text-xs text-slate-500">Saved Today</div>
+                </div>
+                
+                <!-- Controls for Trans Line -->
+                <div class="w-full max-w-[200px] bg-white border border-slate-100 rounded p-2 mb-1">
+                     <div class="flex justify-between text-xs text-slate-600 mb-1">
+                        <span>Length</span>
+                        <span id="vizTransLen">1000 km</span>
+                    </div>
+                    <input type="range" id="transLenSlider" min="100" max="5000" step="100" value="1000" class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="updateSimulation()">
+                </div>
+
+                <div class="text-xs text-slate-400 bg-white px-2">
+                    <span id="vizTransVolt">1000 kV</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-1 bg-white px-2">
+                    <span id="vizTransWeather">Temp: --</span>
+                </div>
+            </div>
+
+            <!-- Node 2: Substation -->
+            <div class="flex flex-col items-center bg-white px-2 z-10">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-3xl shadow-sm border border-slate-200 mb-2">
+                    ⚡
+                </div>
+                <div class="font-bold text-slate-800">Substation</div>
+                <div class="text-xs text-slate-500">Step Down</div>
+            </div>
+
+            <!-- Link 2: Distribution -->
+            <div class="flex-1 flex flex-col items-center px-4">
+                <div class="bg-blue-50 border border-blue-100 rounded px-3 py-1 mb-2 text-center shadow-sm w-full max-w-[200px]">
+                    <div class="text-xs font-semibold text-blue-800 uppercase tracking-wider">Distribution Line</div>
+                    <div class="text-lg font-bold text-green-600" id="vizDistSavings">0 kWh</div>
+                    <div class="text-xs text-slate-500">Saved Today</div>
+                </div>
+
+                <!-- Controls for Dist Line -->
+                <div class="w-full max-w-[200px] bg-white border border-slate-100 rounded p-2 mb-1">
+                     <div class="flex justify-between text-xs text-slate-600 mb-1">
+                        <span>Length</span>
+                        <span id="vizDistLen">20 km</span>
+                    </div>
+                    <input type="range" id="distLenSlider" min="1" max="100" step="1" value="20" class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="updateSimulation()">
+                </div>
+
+                <div class="text-xs text-slate-400 bg-white px-2">
+                    <span id="vizDistVolt">35 kV</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-1 bg-white px-2">
+                    <span id="vizDistWeather">Temp: --</span>
+                </div>
+            </div>
+
+            <!-- Node 3: Households -->
+            <div class="flex flex-col items-center bg-white px-2 z-10">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-3xl shadow-sm border border-slate-200 mb-2">
+                    🏠
+                </div>
+                <div class="font-bold text-slate-800">Households</div>
+                <div class="text-xs text-slate-500" id="vizHouseCount">2M Users</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Section 1: 1000kV Transmission Line -->
+        <div class="col-span-1 lg:col-span-2">
+            <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2">Transmission Line (JL/G1A-630/45 ACSR 1000kV UHVAC)</h2>
+        </div>
+
+        <div class="card">
+            <h3 class="text-lg font-semibold mb-4">Current Load (Amps)</h3>
+            <canvas id="chartTransCurrent"></canvas>
+        </div>
+
+        <div class="card">
+            <h3 class="text-lg font-semibold mb-4">Conductor Temperature (°C)</h3>
+            <canvas id="chartTransTemp"></canvas>
+        </div>
+
+        <!-- Section 2: 35kV Distribution Line -->
+        <div class="col-span-1 lg:col-span-2 mt-4">
+            <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2">Distribution Line (YJV22-26/35-3×400mm² 35kV)</h2>
+        </div>
+
+        <div class="card">
+            <h3 class="text-lg font-semibold mb-4">Current Load (Amps)</h3>
+            <canvas id="chartDistCurrent"></canvas>
+        </div>
+
+        <div class="card">
+            <h3 class="text-lg font-semibold mb-4">Conductor Temperature (°C)</h3>
+            <canvas id="chartDistTemp"></canvas>
+        </div>
+
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="card mt-6 bg-slate-50 border-blue-100 border">
+        <div class="mb-4 border-b border-blue-200 pb-2">
+            <h2 class="text-xl font-bold text-slate-800">Impact Summary</h2>
+            <p class="text-slate-600 mt-1">
+                Data scaled to represent a regional grid serving 
+                <strong class="text-blue-700" id="householdCountDisplay">2,000,000</strong> households.
+            </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div>
+                <p class="metric-label">Peak Current Reduction</p>
+                <p class="metric-value highlight-green" id="metricCurrentRed">0 A</p>
+                <p class="text-sm text-slate-500">Less stress on grid</p>
+            </div>
+            <div>
+                <p class="metric-label">Peak Temp Reduction</p>
+                <p class="metric-value highlight-green" id="metricTempRed">0 °C</p>
+                <p class="text-sm text-slate-500">Extended line life</p>
+            </div>
+            <div>
+                <p class="metric-label">Est. Line Loss Savings</p>
+                <p class="metric-value text-blue-600" id="metricSavings">0 kWh/day</p>
+                <p class="text-sm text-slate-500">Reduced I²R Losses</p>
+            </div>
+            <div>
+                <p class="metric-label">Total Generation Required</p>
+                <p class="metric-value text-slate-800" id="metricTotalEnergy">0 kWh</p>
+                <p class="text-sm text-slate-500">Base: <span id="valBaseEnergy">0</span> | Opt: <span id="valOptEnergy">0</span></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Global Weather Data State ---
+        let weatherData = {
+            temp: new Array(24).fill(25), // Default 25C
+            wind: new Array(24).fill(0.61), // Default 0.61 m/s
+            solar: new Array(24).fill(500) // Default 500 W/m2 (averaged)
+        };
+        let useLiveData = false;
+
+        // --- Weather API Functions ---
+        
+        /**
+         * Helper: Forward Fill for null/NaN values
+         */
+        function smoothData(data, defaultValue) {
+            let smoothed = [];
+            let lastValid = defaultValue;
+            for (let i = 0; i < data.length; i++) {
+                let val = data[i];
+                if (val === null || val === undefined || isNaN(val)) {
+                    val = lastValid;
+                } else {
+                    lastValid = val;
+                }
+                smoothed.push(val);
+            }
+            return smoothed;
+        }
+
+        async function fetchWeatherData() {
+            const city = document.getElementById('cityInput').value;
+            const statusEl = document.getElementById('locationStatus');
+            
+            if (!city) {
+                statusEl.innerText = "Please enter a city name.";
+                return;
+            }
+
+            statusEl.innerText = "Searching for location...";
+            
+            try {
+                // 1. Geocoding
+                const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+                const geoRes = await fetch(geoUrl);
+                const geoData = await geoRes.json();
+
+                if (!geoData.results || geoData.results.length === 0) {
+                    statusEl.innerText = "City not found.";
+                    return;
+                }
+
+                const { latitude, longitude, name, country } = geoData.results[0];
+                statusEl.innerText = `Found: ${name}, ${country}. Fetching forecast...`;
+
+                // 2. Weather Data (Forecast for today)
+                // Added timezone=auto to align weather data with local 00:00-23:00 cycle
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,wind_speed_10m,shortwave_radiation&forecast_days=1&timezone=auto`;
+                const weatherRes = await fetch(weatherUrl);
+                const wData = await weatherRes.json();
+
+                // Process Data with Forward Fill (Smoothing)
+                weatherData.temp = smoothData(wData.hourly.temperature_2m.slice(0, 24), 25);
+                // Convert km/h to m/s before smoothing
+                const windMs = wData.hourly.wind_speed_10m.slice(0, 24).map(w => (w !== null && w !== undefined) ? w / 3.6 : null);
+                weatherData.wind = smoothData(windMs, 0.61);
+                weatherData.solar = smoothData(wData.hourly.shortwave_radiation.slice(0, 24), 0);
+
+                useLiveData = true;
+                
+                // Update UI Summary
+                const avgTemp = (weatherData.temp.reduce((a,b)=>a+b,0)/24).toFixed(1);
+                const avgWind = (weatherData.wind.reduce((a,b)=>a+b,0)/24).toFixed(1);
+                document.getElementById('weatherSummary').innerHTML = `
+                    <strong>${name}</strong> (Next 24h Avg):<br>
+                    Temp: ${avgTemp}°C | Wind: ${avgWind} m/s | Solar: Variable
+                `;
+                statusEl.innerText = "Weather data loaded. Simulation updated.";
+                statusEl.className = "text-sm text-green-600 mt-1";
+
+                updateSimulation();
+
+            } catch (error) {
+                console.error(error);
+                statusEl.innerText = "Error fetching data. Please try again.";
+                statusEl.className = "text-sm text-red-600 mt-1";
+            }
+        }
+
+
+        // --- Physics Engine ---
+
+        // Constants
+        const PI = Math.PI;
+
+        function calculateCurrent(powerKw, voltageKv, type = 'AC', powerFactor = 0.95) {
+            if (type === 'DC') {
+                // For UHVDC (Bipole +/- Voltage)
+                // Power = 2 * Voltage * Current
+                // Current = Power / (2 * Voltage)
+                return (powerKw * 1000) / (2 * (voltageKv * 1000));
+            }
+            // AC 3-Phase
+            return (powerKw * 1000) / (Math.sqrt(3) * (voltageKv * 1000) * powerFactor);
+        }
+
+        function calculateResistance(r20, tempC, material = 'Al') {
+            const alpha = material === 'Cu' ? 0.00393 : 0.00403;
+            return r20 * (1 + alpha * (tempC - 20));
+        }
+
+        /**
+         * IEEE 738 Steady-State Thermal Balance Solver
+         */
+        function solveTemperature(current, r20_per_km, diameter_mm, params, env, hourIdx, tempCorrection = 0) {
+            
+            // Get hourly environment data if available
+            // Safety check: ensure arrays exist and have data at hourIdx
+            let Ta = 25;
+            let V_wind = 0.61;
+            let Qs_flux = 500;
+
+            if (useLiveData) {
+                // Defensive access: Check each array and index explicitly
+                if (weatherData.temp && weatherData.temp[hourIdx] !== undefined && weatherData.temp[hourIdx] !== null) {
+                    Ta = weatherData.temp[hourIdx];
+                }
+                if (weatherData.wind && weatherData.wind[hourIdx] !== undefined && weatherData.wind[hourIdx] !== null) {
+                    V_wind = weatherData.wind[hourIdx];
+                }
+                if (weatherData.solar && weatherData.solar[hourIdx] !== undefined && weatherData.solar[hourIdx] !== null) {
+                    Qs_flux = weatherData.solar[hourIdx];
+                }
+            } else {
+                Ta = env.ambientTemp;
+                V_wind = env.windSpeed;
+                Qs_flux = env.solarRadiation;
+            }
+
+            // Final Guard against NaN
+            if (isNaN(Ta)) Ta = 25;
+            if (isNaN(V_wind)) V_wind = 0.61;
+            if (isNaN(Qs_flux)) Qs_flux = 0;
+            
+            // Apply altitude correction to ambient temp
+            Ta += tempCorrection;
+
+            let Tc = Ta; // Start guess
+            const tolerance = 0.1;
+            const maxIter = 100;
+            
+            const D = diameter_mm / 1000; // meters
+            const epsilon = params.emissivity;
+            const alpha_solar = params.absorptivity;
+            
+            // Solar Heat Gain (Q_s)
+            const Q_s = alpha_solar * Qs_flux * D; 
+
+            for(let i=0; i<maxIter; i++) {
+                const R_km = calculateResistance(r20_per_km, Tc, params.material);
+                const R_m = R_km / 1000;
+                
+                // Joule Heating (Q_j)
+                const Q_j = current * current * R_m;
+                
+                // Radiated Heat Loss (Q_r) - Stefan-Boltzmann
+                const sigma = 5.67e-8;
+                // Protection against Tc < -273.15 (Absolute Zero error)
+                let T_kelvin = Tc + 273.15;
+                if (T_kelvin < 0) T_kelvin = 0;
+                
+                const Q_r = sigma * epsilon * PI * D * (Math.pow(T_kelvin, 4) - Math.pow(Ta + 273.15, 4));
+                
+                // Convected Heat Loss (Q_c)
+                const Tf = (Tc + Ta) / 2; 
+                const rho_air = 1.225 * (293 / (Tf + 273.15));
+                const mu_air = 1.8e-5;
+                const k_air = 0.026;
+                
+                let Q_c = 0;
+                if (V_wind > 0) {
+                    const Re = (rho_air * V_wind * D) / mu_air;
+                    const Nu = 0.683 * Math.pow(Re, 0.466);
+                    const h = (Nu * k_air) / D;
+                    Q_c = h * PI * D * (Tc - Ta);
+                } else {
+                    Q_c = 3.0 * Math.pow(D, 0.75) * Math.pow(Math.abs(Tc - Ta), 1.25); // Math.abs to prevent NaN on negative diff
+                }
+
+                const error = (Q_j + Q_s) - (Q_c + Q_r);
+                
+                // Adaptive step size to prevent divergence
+                let step = error * 0.5;
+                // Clamp step size to avoid exploding values
+                if (step > 50) step = 50;
+                if (step < -50) step = -50;
+                
+                Tc = Tc + step;
+                
+                if(Math.abs(error) < tolerance) break;
+            }
+            
+            // Final fallback if result is NaN
+            if (isNaN(Tc)) return Ta;
+            
+            return Tc;
+        }
+
+
+        /**
+         * Reverse IEEE 738: Calculate Current required to maintain a Target Temperature
+         */
+        function calculateCurrentForTargetTemp(targetTc, r20_per_km, diameter_mm, params, env, hourIdx, tempCorrection = 0) {
+            let Ta = 25;
+            let V_wind = 0.61;
+            let Qs_flux = 500;
+
+            if (useLiveData) {
+                if (weatherData.temp && weatherData.temp[hourIdx] !== undefined) Ta = weatherData.temp[hourIdx];
+                if (weatherData.wind && weatherData.wind[hourIdx] !== undefined) V_wind = weatherData.wind[hourIdx];
+                if (weatherData.solar && weatherData.solar[hourIdx] !== undefined) Qs_flux = weatherData.solar[hourIdx];
+            } else {
+                Ta = env.ambientTemp;
+                V_wind = env.windSpeed;
+                Qs_flux = env.solarRadiation;
+            }
+
+            // Apply altitude correction
+            Ta += tempCorrection;
+
+            // If Target is below Ambient, we cannot cool it actively (Current = 0)
+            // Actually, with Solar, T_conductor > Ambient even at 0 current.
+            // If Target < Equilibrium Temp at 0A, we return 0.
+            
+            const D = diameter_mm / 1000;
+            const epsilon = params.emissivity;
+            const alpha_solar = params.absorptivity;
+            
+            // Solar Heat Gain (Q_s)
+            const Q_s = alpha_solar * Qs_flux * D;
+            
+            // Resistance at Target Temp
+            const R_km = calculateResistance(r20_per_km, targetTc, params.material);
+            const R_m = R_km / 1000;
+
+            // Radiated Heat Loss (Q_r)
+            const sigma = 5.67e-8;
+            let T_kelvin = targetTc + 273.15;
+            const Q_r = sigma * epsilon * PI * D * (Math.pow(T_kelvin, 4) - Math.pow(Ta + 273.15, 4));
+
+            // Convected Heat Loss (Q_c)
+            const Tf = (targetTc + Ta) / 2;
+            const rho_air = 1.225 * (293 / (Tf + 273.15));
+            const mu_air = 1.8e-5;
+            const k_air = 0.026;
+
+            let Q_c = 0;
+            if (V_wind > 0) {
+                const Re = (rho_air * V_wind * D) / mu_air;
+                const Nu = 0.683 * Math.pow(Re, 0.466);
+                const h = (Nu * k_air) / D;
+                Q_c = h * PI * D * (targetTc - Ta);
+            } else {
+                Q_c = 3.0 * Math.pow(D, 0.75) * Math.pow(Math.abs(targetTc - Ta), 1.25);
+            }
+
+            // Heat Balance: Q_j + Q_s = Q_c + Q_r
+            // Q_j = Q_c + Q_r - Q_s
+            const Q_j_required = Q_c + Q_r - Q_s;
+
+            if (Q_j_required <= 0) {
+                return 0; // Impossible to be this cool with Solar gain
+            }
+
+            // I = sqrt(Q_j / R)
+            return Math.sqrt(Q_j_required / R_m);
+        }
+
+
+        // --- Chart Management ---
+        let charts = {};
+        // Global access to simulation results for tooltips
+        let simResultsGlobal = null;
+
+        function initChart(canvasId, label, color, type) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: SIM_DATA.hours.map(h => `${h}:00`),
+                    datasets: [
+                        {
+                            label: 'Baseline (Without Product)',
+                            borderColor: '#94a3b8', // Slate 400
+                            borderDash: [5, 5],
+                            data: [],
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Isothermal (Constant Temp)',
+                            borderColor: color,
+                            backgroundColor: color + '20',
+                            fill: true,
+                            data: [],
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: { y: { beginAtZero: false } },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(context) {
+                                    // Only show weather info on one chart to avoid clutter, or all?
+                                    // Let's show on Temperature charts.
+                                    if (label === 'Temp' && simResultsGlobal) {
+                                        const idx = context[0].dataIndex;
+                                        
+                                        // Retrieve weather data safely
+                                        let ta = 25;
+                                        let wind = 0.61;
+                                        if (useLiveData && weatherData.temp && weatherData.wind) {
+                                            ta = weatherData.temp[idx] !== undefined ? weatherData.temp[idx].toFixed(1) : 'N/A';
+                                            wind = weatherData.wind[idx] !== undefined ? weatherData.wind[idx].toFixed(1) : 'N/A';
+                                        } else {
+                                            // Default
+                                            ta = 25;
+                                            wind = 0.61;
+                                        }
+
+                                        return [
+                                            `Ambient Temp: ${ta} °C`,
+                                            `Wind Speed: ${wind} m/s`,
+                                            `Solar Rad: ${weatherData.solar[idx] || 0} W/m²`
+                                        ];
+                                    }
+                                    return [];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Main Simulation Loop ---
+        function updateSimulation() {
+            // Update Grid Scale from Input
+            if(document.getElementById('gridScaleInput')) {
+                const scale = parseInt(document.getElementById('gridScaleInput').value);
+                if(!isNaN(scale) && scale > 0) {
+                    SIM_DATA.scale_transmission = scale;
+                }
+            }
+
+            // Fallback environment (if not using live data)
+            const envFallback = {
+                ambientTemp: 25,
+                windSpeed: 0.61,
+                solarRadiation: 500
+            };
+
+            const pTrans = SIM_DATA.line_params.transmission;
+            const pDist = SIM_DATA.line_params.distribution;
+
+            // 1. Calculate BASELINE Load Profiles & Results first
+            const baseLoadTrans = SIM_DATA.baseline_household_kw.map(kw => kw * SIM_DATA.scale_transmission);
+            const baseLoadDist = SIM_DATA.baseline_household_kw.map(kw => kw * SIM_DATA.scale_distribution);
+
+            const results = {
+                trans: { baseI: [], optI: [], baseT: [], optT: [] },
+                dist: { baseI: [], optI: [], baseT: [], optT: [] }
+            };
+            simResultsGlobal = results;
+
+            let totalBaseEnergy = 0;
+
+            for(let i=0; i<24; i++) {
+                // Baseline Transmission
+                let I_total_base = calculateCurrent(baseLoadTrans[i], pTrans.voltage_kv, 'AC');
+                let I_sub_base = I_total_base / pTrans.num_bundle;
+                results.trans.baseI.push(I_total_base);
+                
+                let altCorrection = -3; 
+                let Tc_base = solveTemperature(I_sub_base, pTrans.resistance_dc_20_per_km_single, pTrans.diameter_mm, {emissivity: pTrans.emissivity, absorptivity: pTrans.absorptivity, material: 'Al'}, envFallback, i, altCorrection);
+                results.trans.baseT.push(Tc_base);
+
+                // Baseline Distribution
+                let I_base_dist = calculateCurrent(baseLoadDist[i], pDist.voltage_kv, 'AC');
+                results.dist.baseI.push(I_base_dist);
+                let Tc_base_dist = solveTemperature(I_base_dist, pDist.resistance_dc_20_per_km, pDist.diameter_mm, {emissivity: pDist.emissivity, absorptivity: pDist.absorptivity, material: 'Al'}, envFallback, i);
+                results.dist.baseT.push(Tc_base_dist);
+                
+                // Track Energy (Proxy: Sum of Currents? No, sum of Power)
+                // We want to match Total Power.
+                // Assuming Power Factor and Voltage are constant.
+                totalBaseEnergy += baseLoadTrans[i];
+            }
+
+            // 2. ISOTHERMAL OPTIMIZATION with BATTERY CONSTRAINT
+            // Strategy: 
+            // 1. Calculate the ideal "Isothermal Current" profile (Infinite Battery).
+            // 2. Calculate the Power difference (Delta) vs Baseline.
+            // 3. Simulate a Battery attempting to meet this Delta.
+            // 4. If Battery is full/empty, we revert to Baseline (or as close as possible).
+
+            // Battery Params (Per Household)
+            const BATTERY_CAP_KWH = parseFloat(document.getElementById('batteryCapInput').value) || 15;
+            const BATTERY_EFF = 0.95;
+            
+            // Initial pass: Find the Ideal Constant Temp (Target T)
+            let minT = -50;
+            let maxT = 150;
+            let targetT = 25;
+            let idealIsoCurrents = [];
+
+            // Binary Search for Ideal T (Energy Neutral)
+            for(let iter=0; iter<20; iter++) {
+                targetT = (minT + maxT) / 2;
+                let currentSumPower = 0;
+                let tempProfile = [];
+
+                for(let i=0; i<24; i++) {
+                    let altCorrection = -3;
+                    let I_sub_req = calculateCurrentForTargetTemp(targetT, pTrans.resistance_dc_20_per_km_single, pTrans.diameter_mm, {emissivity: pTrans.emissivity, absorptivity: pTrans.absorptivity, material: 'Al'}, envFallback, i, altCorrection);
+                    let I_total_req = I_sub_req * pTrans.num_bundle;
+                    tempProfile.push(I_total_req);
+                    
+                    let P_req = (Math.sqrt(3) * pTrans.voltage_kv * 1000 * I_total_req * 0.95) / 1000; // kW total
+                    currentSumPower += P_req;
+                }
+
+                if (currentSumPower > totalBaseEnergy) {
+                    maxT = targetT; // Too much power -> Need less current -> Lower Temp? Wait.
+                    // Higher Temp -> Allows MORE current for same weather (cooling = heating).
+                    // Actually:
+                    // Heat Balance: I^2 R = Q_out - Q_solar
+                    // Higher I -> Higher Heat.
+                    // If we use too much power, we have too much current.
+                    // To reduce current, we must reduce the allowed Joule heating.
+                    // Joule heating = Convection + Radiation - Solar.
+                    // Lower Target T -> Lower Convection/Radiation -> Lower Allowed Joule Heating -> Lower Current.
+                    // So yes: Too much power -> Need Lower Current -> Need Lower Temp.
+                    maxT = targetT; 
+                } else {
+                    minT = targetT;
+                }
+                idealIsoCurrents = tempProfile;
+            }
+
+            // 3. Apply Battery Constraints (Two-Pass for SoC Neutrality)
+            // Pass 1: Run simulation to see if we drain/fill battery net.
+            // Pass 2: Adjust load to force net zero (Energy Neutral).
+
+            function runBatteryLoop(offsetKw = 0) {
+                let currents = [];
+                let soc = 0.5 * BATTERY_CAP_KWH;
+                
+                for(let i=0; i<24; i++) {
+                    const baseP_total = (Math.sqrt(3) * pTrans.voltage_kv * 1000 * results.trans.baseI[i] * 0.95) / 1000;
+                    const idealP_total = (Math.sqrt(3) * pTrans.voltage_kv * 1000 * idealIsoCurrents[i] * 0.95) / 1000;
+                    
+                    const baseP_hh = baseP_total / SIM_DATA.scale_transmission;
+                    const idealP_hh = idealP_total / SIM_DATA.scale_transmission;
+                    
+                    // Apply Offset to Ideal (to balance SoC)
+                    // If offset is positive, we demand MORE from grid (Charge more/Discharge less).
+                    let targetP_hh = idealP_hh + offsetKw;
+
+                    let actualP_hh = baseP_hh;
+                    let powerDiff = targetP_hh - baseP_hh;
+                    
+                    if (powerDiff > 0) {
+                        // Charge
+                        const spaceLeft = BATTERY_CAP_KWH - soc;
+                        const maxCharge = spaceLeft / BATTERY_EFF;
+                        const actualCharge = Math.min(powerDiff, maxCharge);
+                        soc += actualCharge * BATTERY_EFF;
+                        actualP_hh = baseP_hh + actualCharge;
+                    } else {
+                        // Discharge
+                        const dischargeNeeded = -powerDiff; 
+                        const effOneWay = Math.sqrt(BATTERY_EFF);
+                        const maxOutput = soc * effOneWay;
+                        const actualOutput = Math.min(dischargeNeeded, maxOutput);
+                        soc -= actualOutput / effOneWay;
+                        actualP_hh = baseP_hh - actualOutput;
+                    }
+                    
+                    const actualP_total = actualP_hh * SIM_DATA.scale_transmission;
+                    const actualI_total = calculateCurrent(actualP_total, pTrans.voltage_kv, 'AC');
+                    currents.push(actualI_total);
+                }
+                return { currents, finalSoc: soc };
+            }
+
+            // Pass 1
+            let run1 = runBatteryLoop(0);
+            let startSoc = 0.5 * BATTERY_CAP_KWH;
+            let netDrain = startSoc - run1.finalSoc; // Positive = Drained
+            
+            // Pass 2: Correction
+            // If we drained 10kWh, we need to add 10kWh load to grid over 24h.
+            // Correction Load = NetDrain / 24h.
+            // Note: This assumes linear response, which is roughly true unless we hit edges.
+            // To be precise, we need to account for efficiency.
+            // If we drained X from battery, we saved X * effOneWay? No.
+            // Let's just add the raw energy back.
+            // If NetDrain > 0, we used battery. We need to Demand More from Grid.
+            // How much? NetDrain is Stored Energy. 
+            // To replace it, we need NetDrain / BATTERY_EFF from grid?
+            // Let's approximate: correction = NetDrain / 24.
+            
+            let correctionKw = netDrain / 24;
+            // Apply correction
+            let run2 = runBatteryLoop(correctionKw);
+            
+            // If still not balanced (due to clamping), maybe run 3?
+            // Let's stick to Pass 2 for now, usually enough.
+            let finalOptCurrents = run2.currents;
+            
+            // Update Metrics using Run 2
+            let finalSoc = run2.finalSoc;
+            let finalNetDrain = startSoc - finalSoc;
+            const gridEnergyCorrectionPerHH = finalNetDrain > 0 ? (finalNetDrain / BATTERY_EFF) : 0;
+            const totalCorrectionKwh = gridEnergyCorrectionPerHH * SIM_DATA.scale_transmission;
+
+            // 3. Fill Optimization Results
+            for(let i=0; i<24; i++) {
+                // Transmission Results (Constrained Isothermal)
+                let I_iso = finalOptCurrents[i];
+                results.trans.optI.push(I_iso);
+                
+                // Verify Temp (Might NOT be constant anymore if battery hit limits)
+                let I_sub_iso = I_iso / pTrans.num_bundle;
+                let altCorrection = -3;
+                let Tc_iso = solveTemperature(I_sub_iso, pTrans.resistance_dc_20_per_km_single, pTrans.diameter_mm, {emissivity: pTrans.emissivity, absorptivity: pTrans.absorptivity, material: 'Al'}, envFallback, i, altCorrection);
+                results.trans.optT.push(Tc_iso);
+                
+                // Distribution Results
+                let ratio = I_iso / results.trans.baseI[i];
+                if(isNaN(ratio)) ratio = 1;
+                let I_dist_iso = results.dist.baseI[i] * ratio; 
+                results.dist.optI.push(I_dist_iso);
+                let Tc_dist_iso = solveTemperature(I_dist_iso, pDist.resistance_dc_20_per_km, pDist.diameter_mm, {emissivity: pDist.emissivity, absorptivity: pDist.absorptivity, material: 'Al'}, envFallback, i);
+                results.dist.optT.push(Tc_dist_iso);
+            }
+
+            // 3. Update Charts
+            updateChartData(charts.transCurrent, results.trans.baseI, results.trans.optI);
+            updateChartData(charts.transTemp, results.trans.baseT, results.trans.optT);
+            updateChartData(charts.distCurrent, results.dist.baseI, results.dist.optI);
+            updateChartData(charts.distTemp, results.dist.baseT, results.dist.optT);
+
+            // 4. Calculate Metrics (Peak Reduction)
+            const maxBaseI = Math.max(...results.trans.baseI);
+            const maxOptI = Math.max(...results.trans.optI);
+            const currentRed = maxBaseI - maxOptI;
+            
+            const maxBaseT = Math.max(...results.trans.baseT);
+            const maxOptT = Math.max(...results.trans.optT);
+            let tempRed = maxBaseT - maxOptT;
+            
+            // Calculate Savings
+            let lossBase = 0;
+            let lossOpt = 0;
+            
+            // New separate tracking for visualization
+            let lossTransBaseTotal = 0;
+            let lossTransOptTotal = 0;
+            let lossDistBaseTotal = 0;
+            let lossDistOptTotal = 0;
+
+            // Get lengths from inputs
+            const LENGTH_TRANS_KM = parseFloat(document.getElementById('transLenSlider').value) || 1000;
+            const LENGTH_DIST_KM = parseFloat(document.getElementById('distLenSlider').value) || 20;
+
+            for(let i=0; i<24; i++) {
+                // --- Transmission Loss ---
+                let R_single_base = calculateResistance(pTrans.resistance_dc_20_per_km_single, results.trans.baseT[i], 'Al');
+                let R_single_opt = calculateResistance(pTrans.resistance_dc_20_per_km_single, results.trans.optT[i], 'Al');
+                
+                let I_sub_base = results.trans.baseI[i] / pTrans.num_bundle;
+                let I_sub_opt = results.trans.optI[i] / pTrans.num_bundle;
+                
+                let loss_trans_base = 3 * pTrans.num_bundle * Math.pow(I_sub_base, 2) * R_single_base * LENGTH_TRANS_KM;
+                let loss_trans_opt = 3 * pTrans.num_bundle * Math.pow(I_sub_opt, 2) * R_single_opt * LENGTH_TRANS_KM;
+                
+                lossTransBaseTotal += loss_trans_base;
+                lossTransOptTotal += loss_trans_opt;
+
+                // --- Distribution Loss ---
+                let R_dist_base = calculateResistance(pDist.resistance_dc_20_per_km, results.dist.baseT[i], 'Al');
+                let R_dist_opt = calculateResistance(pDist.resistance_dc_20_per_km, results.dist.optT[i], 'Al');
+                
+                let loss_dist_base = 3 * Math.pow(results.dist.baseI[i], 2) * R_dist_base * LENGTH_DIST_KM;
+                let loss_dist_opt = 3 * Math.pow(results.dist.optI[i], 2) * R_dist_opt * LENGTH_DIST_KM;
+
+                lossDistBaseTotal += loss_dist_base;
+                lossDistOptTotal += loss_dist_opt;
+            }
+
+            lossBase = lossTransBaseTotal + lossDistBaseTotal;
+            lossOpt = lossTransOptTotal + lossDistOptTotal;
+            const savingsKwh = (lossBase - lossOpt) / 1000; // Wh to kWh
+
+            // --- Update Visualization ---
+            const savingsTransKwh = (lossTransBaseTotal - lossTransOptTotal) / 1000;
+            const savingsDistKwh = (lossDistBaseTotal - lossDistOptTotal) / 1000;
+            
+            document.getElementById('vizTransSavings').innerText = `${savingsTransKwh.toFixed(0)} kWh`;
+            document.getElementById('vizDistSavings').innerText = `${savingsDistKwh.toFixed(0)} kWh`;
+            
+            document.getElementById('vizTransLen').innerText = `${LENGTH_TRANS_KM} km`;
+            document.getElementById('vizDistLen').innerText = `${LENGTH_DIST_KM} km`;
+            
+            document.getElementById('vizTransVolt').innerText = `${pTrans.voltage_kv} kV`;
+            document.getElementById('vizDistVolt').innerText = `${pDist.voltage_kv} kV`;
+
+            // Visualization Weather (Average or current)
+            const avgTemp = (weatherData.temp.reduce((a,b)=>a+b,0)/24).toFixed(1);
+            const avgTransTemp = (parseFloat(avgTemp) - 3).toFixed(1);
+            
+            document.getElementById('vizTransWeather').innerText = `Avg Amb: ${avgTransTemp}°C`;
+            document.getElementById('vizDistWeather').innerText = `Avg Amb: ${avgTemp}°C`;
+            
+            document.getElementById('vizHouseCount').innerText = `${SIM_DATA.scale_transmission.toLocaleString()} Users`;
+
+            // Total Energy Calculation
+            // We optimized to match totalBaseEnergy, so diff should be ~0 (except for rounding/efficiency)
+            // But let's show the actual P_iso sum
+            const totalOptKwh = finalOptCurrents.reduce((acc, I) => {
+                 return acc + (Math.sqrt(3) * pTrans.voltage_kv * 1000 * I * 0.95) / 1000;
+            }, 0) * SIM_DATA.scale_transmission; // Scale to Grid? No wait, I is total.
+            
+            // Wait, calculateCurrent uses Total Power (kW) to get Total Current.
+            // So if I is Total Current, then P is Total Power.
+            // My reduce above calculates Total Power for 1 hour? No, Energy.
+            // But finalOptCurrents has 24 entries.
+            // So sum is kWh.
+            
+            // Re-calculate strictly from current to be consistent
+            const totalOptKwhCalc = finalOptCurrents.reduce((acc, I) => {
+                 return acc + (Math.sqrt(3) * pTrans.voltage_kv * 1000 * I * 0.95) / 1000;
+            }, 0);
+            
+            // Apply Correction for Net Battery Usage (Remaining after Pass 2)
+            const adjustedTotalOptKwh = totalOptKwhCalc + totalCorrectionKwh;
+            
+            const baseTotalGenKwh = totalBaseEnergy + (lossBase / 1000);
+            const optTotalGenKwh = adjustedTotalOptKwh + (lossOpt / 1000);
+            const diffKwh = optTotalGenKwh - baseTotalGenKwh;
+            const pctDiff = (diffKwh / baseTotalGenKwh) * 100;
+
+            document.getElementById('metricCurrentRed').innerText = `${currentRed.toFixed(1)} A`;
+            document.getElementById('metricTempRed').innerText = `${tempRed.toFixed(1)} °C`;
+            document.getElementById('metricSavings').innerText = `${savingsKwh.toFixed(0)} kWh`;
+            
+            document.getElementById('metricTotalEnergy').innerText = `${pctDiff > 0 ? '+' : ''}${pctDiff.toFixed(2)}%`;
+            document.getElementById('metricTotalEnergy').className = pctDiff > 0 ? "metric-value text-red-600" : "metric-value text-green-600";
+            
+            // Format large numbers
+            const fmt = (num) => {
+                if(num > 1e6) return (num/1e6).toFixed(2) + ' M';
+                if(num > 1e3) return (num/1e3).toFixed(2) + ' k';
+                return num.toFixed(0);
+            };
+
+            document.getElementById('valBaseEnergy').innerText = fmt(baseTotalGenKwh);
+            document.getElementById('valOptEnergy').innerText = fmt(optTotalGenKwh);
+            
+            // Update Household Count Display
+            if(document.getElementById('householdCountDisplay')) {
+                const num = SIM_DATA.scale_transmission;
+                const fmtNum = num > 1e6 ? (num/1e6).toFixed(2) + ' M' : (num/1e3).toFixed(0) + ' k';
+                document.getElementById('householdCountDisplay').innerText = fmtNum;
+            }
+            
+            // Update viz
+            document.getElementById('vizHouseCount').innerText = `${SIM_DATA.scale_transmission > 1e6 ? (SIM_DATA.scale_transmission/1e6).toFixed(2)+' M' : (SIM_DATA.scale_transmission/1e3).toFixed(0)+' k'} Users`;
+        }
+
+        function updateChartData(chart, dataBase, dataOpt) {
+            chart.data.datasets[0].data = dataBase;
+            chart.data.datasets[1].data = dataOpt;
+            chart.update();
+        }
+
+        function computeNetSavingsForCap(cap) {
+            const envFallback = { ambientTemp: 25, windSpeed: 0.61, solarRadiation: 500 };
+            const pTrans = SIM_DATA.line_params.transmission;
+            const pDist = SIM_DATA.line_params.distribution;
+            const baseLoadTrans = SIM_DATA.baseline_household_kw.map(kw => kw * SIM_DATA.scale_transmission);
+            const baseLoadDist = SIM_DATA.baseline_household_kw.map(kw => kw * SIM_DATA.scale_distribution);
+            const resultsLocal = { trans: { baseI: [], baseT: [] }, dist: { baseI: [], baseT: [] } };
+            let totalBaseEnergy = 0;
+            for (let i = 0; i < 24; i++) {
+                const I_total_base = calculateCurrent(baseLoadTrans[i], pTrans.voltage_kv, 'AC');
+                const I_sub_base = I_total_base / pTrans.num_bundle;
+                resultsLocal.trans.baseI.push(I_total_base);
+                const Tc_base = solveTemperature(I_sub_base, pTrans.resistance_dc_20_per_km_single, pTrans.diameter_mm, { emissivity: pTrans.emissivity, absorptivity: pTrans.absorptivity, material: 'Al' }, envFallback, i, -3);
+                resultsLocal.trans.baseT.push(Tc_base);
+                const I_base_dist = calculateCurrent(baseLoadDist[i], pDist.voltage_kv, 'AC');
+                resultsLocal.dist.baseI.push(I_base_dist);
+                const Tc_base_dist = solveTemperature(I_base_dist, pDist.resistance_dc_20_per_km, pDist.diameter_mm, { emissivity: pDist.emissivity, absorptivity: pDist.absorptivity, material: 'Al' }, envFallback, i);
+                resultsLocal.dist.baseT.push(Tc_base_dist);
+                totalBaseEnergy += baseLoadTrans[i];
+            }
+            const BATTERY_CAP_KWH = cap;
+            const BATTERY_EFF = 0.95;
+            let minT = -50, maxT = 150, targetT = 25;
+            let idealIsoCurrents = [];
+            for (let iter = 0; iter < 20; iter++) {
+                targetT = (minT + maxT) / 2;
+                let currentSumPower = 0;
+                let tempProfile = [];
+                for (let i = 0; i < 24; i++) {
+                    const I_sub_req = calculateCurrentForTargetTemp(targetT, pTrans.resistance_dc_20_per_km_single, pTrans.diameter_mm, { emissivity: pTrans.emissivity, absorptivity: pTrans.absorptivity, material: 'Al' }, envFallback, i, -3);
+                    const I_total_req = I_sub_req * pTrans.num_bundle;
+                    tempProfile.push(I_total_req);
+                    const P_req = (Math.sqrt(3) * pTrans.voltage_kv * 1000 * I_total_req * 0.95) / 1000;
+                    currentSumPower += P_req;
+                }
+                if (currentSumPower > totalBaseEnergy) maxT = targetT; else minT = targetT;
+                idealIsoCurrents = tempProfile;
+            }
+            function runBatteryLoopLocal(offsetKw) {
+                let currents = [];
+                let soc = 0.5 * BATTERY_CAP_KWH;
+                for (let i = 0; i < 24; i++) {
+                    const baseP_total = (Math.sqrt(3) * pTrans.voltage_kv * 1000 * resultsLocal.trans.baseI[i] * 0.95) / 1000;
+                    const idealP_total = (Math.sqrt(3) * pTrans.voltage_kv * 1000 * idealIsoCurrents[i] * 0.95) / 1000;
+                    const baseP_hh = baseP_total / SIM_DATA.scale_transmission;
+                    const idealP_hh = idealP_total / SIM_DATA.scale_transmission;
+                    const targetP_hh = idealP_hh + offsetKw;
+                    let actualP_hh = baseP_hh;
+                    const powerDiff = targetP_hh - baseP_hh;
+                    if (powerDiff > 0) {
+                        const spaceLeft = BATTERY_CAP_KWH - soc;
+                        const maxCharge = spaceLeft / BATTERY_EFF;
+                        const actualCharge = Math.min(powerDiff, maxCharge);
+                        soc += actualCharge * BATTERY_EFF;
+                        actualP_hh = baseP_hh + actualCharge;
+                    } else {
+                        const dischargeNeeded = -powerDiff;
+                        const effOneWay = Math.sqrt(BATTERY_EFF);
+                        const maxOutput = soc * effOneWay;
+                        const actualOutput = Math.min(dischargeNeeded, maxOutput);
+                        soc -= actualOutput / effOneWay;
+                        actualP_hh = baseP_hh - actualOutput;
+                    }
+                    const actualP_total = actualP_hh * SIM_DATA.scale_transmission;
+                    const actualI_total = calculateCurrent(actualP_total, pTrans.voltage_kv, 'AC');
+                    currents.push(actualI_total);
+                }
+                return { currents, finalSoc: soc };
+            }
+            const run1 = runBatteryLoopLocal(0);
+            const startSoc = 0.5 * BATTERY_CAP_KWH;
+            const netDrain = startSoc - run1.finalSoc;
+            const correctionKw = netDrain / 24;
+            const run2 = runBatteryLoopLocal(correctionKw);
+            const finalOptCurrents = run2.currents;
+            const finalSoc = run2.finalSoc;
+            const finalNetDrain = startSoc - finalSoc;
+            const gridEnergyCorrectionPerHH = finalNetDrain > 0 ? (finalNetDrain / BATTERY_EFF) : 0;
+            const totalCorrectionKwh = gridEnergyCorrectionPerHH * SIM_DATA.scale_transmission;
+            let lossTransBaseTotal = 0, lossTransOptTotal = 0, lossDistBaseTotal = 0, lossDistOptTotal = 0;
+            for (let i = 0; i < 24; i++) {
+                const R_single_base = calculateResistance(pTrans.resistance_dc_20_per_km_single, resultsLocal.trans.baseT[i], 'Al');
+                const I_sub_base = resultsLocal.trans.baseI[i] / pTrans.num_bundle;
+                const I_sub_opt = finalOptCurrents[i] / pTrans.num_bundle;
+                const Tc_opt = solveTemperature(I_sub_opt, pTrans.resistance_dc_20_per_km_single, pTrans.diameter_mm, { emissivity: pTrans.emissivity, absorptivity: pTrans.absorptivity, material: 'Al' }, envFallback, i, -3);
+                const R_single_opt = calculateResistance(pTrans.resistance_dc_20_per_km_single, Tc_opt, 'Al');
+                lossTransBaseTotal += 3 * pTrans.num_bundle * Math.pow(I_sub_base, 2) * R_single_base * (parseFloat(document.getElementById('transLenSlider').value) || 1000);
+                lossTransOptTotal += 3 * pTrans.num_bundle * Math.pow(I_sub_opt, 2) * R_single_opt * (parseFloat(document.getElementById('transLenSlider').value) || 1000);
+                const R_dist_base = calculateResistance(pDist.resistance_dc_20_per_km, resultsLocal.dist.baseT[i], 'Al');
+                const ratio = finalOptCurrents[i] / resultsLocal.trans.baseI[i];
+                const I_dist_opt = resultsLocal.dist.baseI[i] * (isNaN(ratio) ? 1 : ratio);
+                const Tc_dist_opt = solveTemperature(I_dist_opt, pDist.resistance_dc_20_per_km, pDist.diameter_mm, { emissivity: pDist.emissivity, absorptivity: pDist.absorptivity, material: 'Al' }, envFallback, i);
+                const R_dist_opt = calculateResistance(pDist.resistance_dc_20_per_km, Tc_dist_opt, 'Al');
+                lossDistBaseTotal += 3 * Math.pow(resultsLocal.dist.baseI[i], 2) * R_dist_base * (parseFloat(document.getElementById('distLenSlider').value) || 20);
+                lossDistOptTotal += 3 * Math.pow(I_dist_opt, 2) * R_dist_opt * (parseFloat(document.getElementById('distLenSlider').value) || 20);
+            }
+            const savingsKwh = (lossTransBaseTotal + lossDistBaseTotal - (lossTransOptTotal + lossDistOptTotal)) / 1000;
+            const totalOptKwhCalc = finalOptCurrents.reduce((acc, I) => acc + (Math.sqrt(3) * pTrans.voltage_kv * 1000 * I * 0.95) / 1000, 0);
+            const adjustedTotalOptKwh = totalOptKwhCalc + totalCorrectionKwh;
+            const diffKwh = adjustedTotalOptKwh - totalBaseEnergy;
+            const batteryPenalty = diffKwh > 0 ? diffKwh : 0;
+            const netSaving = savingsKwh - batteryPenalty;
+            return { netSaving };
+        }
+
+        function findOptimalBatteryCapacity() {
+            let bestCap = 5;
+            let bestNet = -1e9;
+            for (let c = 5; c <= 50; c += 0.5) {
+                const res = computeNetSavingsForCap(parseFloat((Math.round(c*2)/2).toFixed(1)));
+                if (res.netSaving > bestNet) { bestNet = res.netSaving; bestCap = parseFloat((Math.round(c*2)/2).toFixed(1)); }
+            }
+            const snapped = parseFloat((Math.round(bestCap*2)/2).toFixed(1));
+            const resFinal = computeNetSavingsForCap(snapped);
+            document.getElementById('batteryCapInput').value = snapped;
+            document.getElementById('batteryCapVal').innerText = snapped + ' kWh';
+            document.getElementById('optimalCapVal').innerText = 'Optimal ' + snapped + ' kWh, net saving ' + resFinal.netSaving.toFixed(0) + ' kWh';
+            updateSimulation();
+        }
+
+        // Initialize
+        window.onload = function() {
+            charts.transCurrent = initChart('chartTransCurrent', 'Current', '#3b82f6');
+            charts.transTemp = initChart('chartTransTemp', 'Temp', '#ef4444');
+            charts.distCurrent = initChart('chartDistCurrent', 'Current', '#3b82f6');
+            charts.distTemp = initChart('chartDistTemp', 'Temp', '#ef4444');
+            
+            updateSimulation();
+        };
+
+    </script>
+</body>
+</html>

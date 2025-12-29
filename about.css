@@ -1,0 +1,153 @@
+:root { --c1:#022B3A; --c2:#1F7A8C; --c3:#BFDBF7; --c4:#E1E5F2; --c5:#FFFFFF }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* Header */
+.hdr {
+  position: sticky; top: 0; z-index: 20;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.brand { font-weight: 900; letter-spacing: .4px; font-size: 1.2rem; }
+.menu { display: flex; gap: 12px }
+.menu a {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 36px; padding: 0 10px;
+  color: #fff; text-decoration: none;
+  border-radius: 10px; border: 1px solid rgba(255,255,255,.16);
+  font-size: 0.9rem;
+}
+.menu a:hover { background: rgba(255,255,255,.06) }
+.menu svg { display: block }
+
+/* Pages / Scenes */
+.page {
+  /* Taller than viewport to create the "pause" scroll effect */
+  height: 150vh;
+  position: relative;
+  width: 100%;
+}
+
+.pin {
+  /* Sticky container that holds the content in place */
+  position: sticky;
+  top: 56px; /* Match header height */
+  height: calc(100vh - 56px);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 24px; /* Horizontal padding */
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Page 1: Team */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 60px; /* Increased gap for better spacing with text */
+  justify-items: center;
+  align-items: start; /* Align to top so different text lengths don't break layout */
+}
+.member-card {
+  width: 100%;
+  max-width: 440px; /* Slightly wider to accommodate text */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: rgba(255,255,255,0.03); /* Subtle background for the card */
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 24px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+.member-card:hover {
+  background: rgba(255,255,255,0.05);
+  transform: translateY(-5px);
+}
+.portrait-placeholder {
+  aspect-ratio: 3/4;
+  width: 100%;
+  background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #555;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+.member-info {
+  text-align: left; /* Changed to left align for better readability of bio */
+}
+.member-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: var(--c3); }
+.member-role { color: #888; font-size: 0.95rem; font-weight: 500; margin-bottom: 16px; display: block; }
+.member-bio {
+  color: #d2d7dc;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+/* Page 2 & 3: Split Layout */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.text-box {
+  background: #0b0b0b;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 16px;
+  padding: 32px;
+}
+.text-box h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.8rem;
+  color: var(--c3);
+}
+.text-box p {
+  margin: 0;
+  line-height: 1.6;
+  color: #d2d7dc;
+  text-align: justify;
+}
+.img-col {
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .team-grid { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; }
+  .split-layout { grid-template-columns: 1fr; gap: 40px; }
+  .img-col { order: -1; min-height: 300px; }
+}

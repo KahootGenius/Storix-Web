@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storix — Purchasement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="purchase.css" rel="stylesheet">
+</head>
+<body>
+<div class="hdr">
+  <div class="brand">Storix</div>
+  <div class="cta">
+    <a class="icon-back" href="apple-scroll.html" aria-label="Back to showcase">
+      <svg viewBox="0 0 24 24" width="22" height="22">
+        <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+      </svg>
+    </a>
+  </div>
+</div>
+<div class="container">
+  <div class="grid">
+    <div class="product">
+      <div class="placeholder" aria-label="Product image placeholder"></div>
+    </div>
+    <div id="panel-scroll" class="panel">
+    <form id="purchase-form" class="card">
+      <h2>Select Configuration</h2>
+      <div class="group">
+        <label>Modules</label>
+        <div class="row">
+          <div class="opt"><input type="checkbox" name="forecast" id="forecast"><label for="forecast">Forecasting</label></div>
+          <div class="opt"><input type="checkbox" name="storage" id="storage"><label for="storage">Storage</label></div>
+          <div class="opt"><input type="checkbox" name="transport" id="transport"><label for="transport">Transport</label></div>
+        </div>
+      </div>
+      <div class="group">
+        <label>Region tier</label>
+        <div class="row">
+          <div class="opt"><input type="radio" name="region" id="r1" value="1000" checked><label for="r1">Tier 1</label></div>
+          <div class="opt"><input type="radio" name="region" id="r2" value="3000"><label for="r2">Tier 2</label></div>
+          <div class="opt"><input type="radio" name="region" id="r3" value="6000"><label for="r3">Tier 3</label></div>
+        </div>
+      </div>
+      <div class="group">
+        <label>SLA</label>
+        <div class="row">
+          <div class="opt"><input type="radio" name="sla" id="s1" value="1000" checked><label for="s1">Standard</label></div>
+          <div class="opt"><input type="radio" name="sla" id="s2" value="3000"><label for="s2">Enhanced</label></div>
+          <div class="opt"><input type="radio" name="sla" id="s3" value="5000"><label for="s3">Premium</label></div>
+        </div>
+      </div>
+      <div class="cta">
+        <a class="btn" href="#summary">Update summary</a>
+        <a class="btn secondary" href="mailto:yourname@example.com">Contact sales</a>
+      </div>
+      <div class="note">Prices are indicative for demo purposes.</div>
+    </form>
+    <div id="summary" class="summary">
+      <h3>Summary</h3>
+      <div id="breakdown"></div>
+      <div class="total" id="total">$0</div>
+    </div>
+    </div>
+  </div>
+</div>
+<script src="purchase.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storix — Apple-style Dropdown Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="apple.css" rel="stylesheet">
+</head>
+<body>
+<header class="header">
+  <div class="container bar">
+    <div class="brand">Storix</div>
+    <nav class="nav">
+      <button data-mega="mega-presence">Presence Work</button>
+      <button data-mega="mega-team">Team Story</button>
+      <button data-mega="mega-feas">Feasibility</button>
+      <button data-mega="mega-impact">Impact</button>
+      <button data-mega="mega-dist">Distribution</button>
+      <button data-mega="mega-prod">Purchasement & Product</button>
+    </nav>
+  </div>
+  <div id="mega" class="mega">
+    <div id="mega-content" class="container">
+      <div id="mega-presence" class="mega-section" style="display:none">
+        <div class="card"><h4>Presence Work</h4><div class="list"><div class="item"><div class="dot"></div><div>Field pilots and operations</div></div><div class="item"><div class="dot"></div><div>Data pipelines and monitoring</div></div></div></div>
+        <div class="card"><h4>KPIs</h4><div class="list"><div class="item"><div class="dot"></div><div>Forecast accuracy</div></div><div class="item"><div class="dot"></div><div>Storage utilization</div></div></div></div>
+        <div class="card"><h4>Contacts</h4><div class="list"><div class="item"><div class="dot"></div><div>Support and onboarding</div></div></div></div>
+      </div>
+      <div id="mega-team" class="mega-section" style="display:none">
+        <div class="card"><h4>Mission</h4><div>Reduce peak-period losses via forecasting and storage.</div></div>
+        <div class="card"><h4>Vision</h4><div>Efficient, low-carbon energy systems.</div></div>
+        <div class="card"><h4>Values</h4><div class="list"><div class="item"><div class="dot"></div><div>Reliability</div></div><div class="item"><div class="dot"></div><div>Transparency</div></div><div class="item"><div class="dot"></div><div>Collaboration</div></div></div></div>
+      </div>
+      <div id="mega-feas" class="mega-section" style="display:none">
+        <div class="card"><h4>Technical</h4><div>ML forecasting, storage optimization, dispatch orchestration.</div></div>
+        <div class="card"><h4>Operational</h4><div>Integration with utility SCADA and scheduling.</div></div>
+        <div class="card"><h4>Financial</h4><div>ROI through loss reduction and peak shaving.</div></div>
+      </div>
+      <div id="mega-impact" class="mega-section" style="display:none">
+        <div class="card"><h4>Grid</h4><div>Lower stress and line losses.</div></div>
+        <div class="card"><h4>Environment</h4><div>Reduced emissions via efficient dispatch.</div></div>
+        <div class="card"><h4>Customers</h4><div>Improved reliability and cost control.</div></div>
+      </div>
+      <div id="mega-dist" class="mega-section" style="display:none">
+        <div class="card"><h4>Channels</h4><div>Direct utility sales and partners.</div></div>
+        <div class="card"><h4>Regions</h4><div>Rollouts by grid operator segments.</div></div>
+        <div class="card"><h4>Support</h4><div>Onboarding, training, SLAs.</div></div>
+      </div>
+      <div id="mega-prod" class="mega-section" style="display:none">
+        <div class="card"><h4>Offering</h4><div>Platform subscription and services.</div></div>
+        <div class="card"><h4>Procurement</h4><div>Compliance and vendor onboarding.</div></div>
+        <div class="card"><h4>Roadmap</h4><div>Modules for forecasting, storage, transport.</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+<section class="hero">
+  <div class="container">
+    <h1>Apple-style Dropdown Experience</h1>
+    <p>Explore sections via top dropdown and expand details below.</p>
+    <div class="cta">
+      <a class="btn" href="#sections">Jump to sections</a>
+      <a class="btn secondary" href="index.html">Back to site</a>
+    </div>
+  </div>
+</section>
+<main id="sections">
+  <section class="section">
+    <div class="container">
+      <div class="accordion">
+        <div class="acc-item open">
+          <div class="acc-header"><div class="acc-title">Presence Work</div><div class="acc-icon">▾</div></div>
+          <div class="acc-content">
+            <div class="grid">
+              <div class="card">
+                <div class="list">
+                  <div class="item"><div class="dot"></div><div>Pilot deployments and field ops</div></div>
+                  <div class="item"><div class="dot"></div><div>Data ingestion, validation and monitoring</div></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="stat-grid">
+                  <div class="stat"><div class="value">95%+</div><div>Forecast accuracy target</div></div>
+                  <div class="stat"><div class="value">↑</div><div>Storage utilization uplift</div></div>
+                  <div class="stat"><div class="value">≤ 5 min</div><div>Dispatch response window</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><div class="acc-title">Team Story (Mission, Vision, Values)</div><div class="acc-icon">▾</div></div>
+          <div class="acc-content">
+            <div class="grid">
+              <div class="card"><strong>Mission</strong><div>Reduce peak-period losses via forecasting and storage.</div></div>
+              <div class="card"><strong>Vision</strong><div>Efficient, low-carbon energy systems.</div></div>
+              <div class="card"><strong>Values</strong><div class="list"><div class="item"><div class="dot"></div><div>Reliability</div></div><div class="item"><div class="dot"></div><div>Transparency</div></div><div class="item"><div class="dot"></div><div>Collaboration</div></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><div class="acc-title">Feasibility</div><div class="acc-icon">▾</div></div>
+          <div class="acc-content">
+            <div class="grid">
+              <div class="card"><strong>Technical</strong><div>ML forecasting, storage optimization, dispatch orchestration.</div></div>
+              <div class="card"><strong>Operational</strong><div>Integrations with utility systems and scheduling.</div></div>
+              <div class="card"><strong>Financial</strong><div>ROI through loss reduction and peak shaving.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><div class="acc-title">Impact</div><div class="acc-icon">▾</div></div>
+          <div class="acc-content">
+            <div class="grid">
+              <div class="card"><strong>Grid</strong><div>Less stress and lower line losses.</div></div>
+              <div class="card"><strong>Environment</strong><div>Reduced emissions via efficient dispatch.</div></div>
+              <div class="card"><strong>Customers</strong><div>Reliability and cost control improvements.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><div class="acc-title">Distribution</div><div class="acc-icon">▾</div></div>
+          <div class="acc-content">
+            <div class="grid">
+              <div class="card"><strong>Channels</strong><div>Direct utility sales and partners.</div></div>
+              <div class="card"><strong>Regions</strong><div>Segmented rollouts with grid operators.</div></div>
+              <div class="card"><strong>Support</strong><div>Onboarding, training, SLAs.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header"><div class="acc-title">Purchasement & Product</div><div class="acc-icon">▾</div></div>
+          <div class="acc-content">
+            <div class="grid">
+              <div class="card"><strong>Offering</strong><div>Platform subscription and services.</div></div>
+              <div class="card"><strong>Procurement</strong><div>Compliance and vendor onboarding.</div></div>
+              <div class="card"><strong>Roadmap</strong><div>Forecasting, storage and transport modules.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="footer">
+  <div class="container">© <span id="year"></span> Storix</div>
+</footer>
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+<script src="apple.js"></script>
+</body>
+</html>
