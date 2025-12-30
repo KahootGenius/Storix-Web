@@ -114,7 +114,11 @@
                 </div>
                 <div class="text-block">
                     <strong class="text-[#4E80EE]">2. Physics-Based Optimization:</strong><br>
-                    The system applies a fundamental physics principle: conductor resistance rises with temperature, increasing I²R losses, especially during peak‑load periods. By driving the network toward a more isothermal operating condition, Storix stabilizes resistance and minimizes thermal losses.
+                    The system applies a fundamental physics principle: conductor resistance rises with temperature ($R(T) = R_0[1 + \alpha(T-T_0)]$), increasing $I^2R$ (Joule heating) losses, especially during peak‑load periods. By driving the network toward a more isothermal operating condition, Storix stabilizes resistance and minimizes thermal losses.
+                </div>
+                <div class="text-block mt-4">
+                    <strong class="text-[#4E80EE]">Where do the savings come from?</strong><br>
+                    By using batteries to shave peak loads, we prevent the conductors from overheating during high-demand hours. Lower peak temperatures mean lower resistance, and since power loss is proportional to the square of current ($P_{loss} = I^2R$), even small reductions in peak current and resistance yield significant energy savings.
                 </div>
             </div>
          </div>
@@ -150,6 +154,16 @@
                     <div class="text-white font-semibold mb-2">Performance</div>
                     <div class="text-sm text-slate-400">Supports lower-grade, lower-voltage wiring without sacrificing grid performance or reliability.</div>
                 </div>
+            </div>
+
+            <div class="mt-16">
+                <a href="product.html" class="inline-flex items-center gap-2 bg-[#4E80EE] text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-[#3A60B2] transition-all transform hover:scale-105 shadow-lg shadow-blue-900/20">
+                    Try the Simulator
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <p class="text-slate-500 mt-4 text-sm">Experience the physics engine in action with real-time data.</p>
             </div>
         </div>
       </div>
