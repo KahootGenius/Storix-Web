@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const map = L.map('map-container', {
             zoomControl: false,
             attributionControl: false
-        }).setView([31.2304, 121.4737], 13);
+        }).setView([40.0255, 116.4455], 13);
         
         // Dark mode tiles (CartoDB Dark Matter)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -114,8 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
             iconAnchor: [7, 7]
         });
 
-        L.marker([31.2304, 121.4737], { icon: storixIcon }).addTo(map)
-            .bindPopup('<b>Storix Energy Hub</b><br>Shanghai, China');
+        L.marker([40.0255, 116.4455], { icon: storixIcon }).addTo(map)
+            .bindPopup('<b>Beijing World Youth Academy</b><br>Chaoyang District, Beijing');
     }
 });
 </script>
