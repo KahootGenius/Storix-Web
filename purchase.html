@@ -13,54 +13,81 @@
 <div class="hdr">
   <div class="brand">Storix</div>
   <nav class="menu" style="display: flex; gap: 12px; margin-left: auto; margin-right: 24px;">
-    <a href="about.html" style="color: #fff; text-decoration: none; display: flex; align-items: center; gap: 6px;"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>About</a>
-    <a href="product-overview.html" style="color: #fff; text-decoration: none; display: flex; align-items: center; gap: 6px;"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4v6l-9 4-9-4v-6z"/></svg>Product</a>
-    <a href="purchase.html" style="color: #fff; text-decoration: none; display: flex; align-items: center; gap: 6px; border-bottom: 2px solid #4E80EE;"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 7V6a5 5 0 0110 0v1h2a1 1 0 011 1l-1.2 12a2 2 0 01-2 1.8H8.2a2 2 0 01-2-1.8L5 8a1  1 0 011-1h1zm2 0h6V6a3 3 0 00-6 0v1z"/></svg>Product Lineup</a>
+    <a href="index.html" style="color: #0b0f19; text-decoration: none; display: flex; align-items: center; gap: 6px;"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</a>
+    <a href="about.html" style="color: #0b0f19; text-decoration: none; display: flex; align-items: center; gap: 6px;"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>About</a>
+    <a href="product-overview.html" style="color: #0b0f19; text-decoration: none; display: flex; align-items: center; gap: 6px;"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4v6l-9 4-9-4v-6z"/></svg>Product</a>
+    <a href="purchase.html" style="color: #0b0f19; text-decoration: none; display: flex; align-items: center; gap: 6px; border-bottom: 2px solid #4E80EE;"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 7V6a5 5 0 0110 0v1h2a1 1 0 011 1l-1.2 12a2 2 0 01-2 1.8H8.2a2 2 0 01-2-1.8L5 8a1  1 0 011-1h1zm2 0h6V6a3 3 0 00-6 0v1z"/></svg>Product Lineup</a>
   </nav>
 </div>
-<div class="container">
-  <div class="grid">
-    <div class="product">
-      <div class="placeholder" aria-label="Product image placeholder"></div>
+<div class="container sales-page">
+  <div class="sales-header">
+    <h1>Sales</h1>
+    <div class="subtitle">Business Model</div>
+  </div>
+
+  <div class="split-layout">
+    <!-- Left Column: Household -->
+    <div class="col left">
+      <h3 class="col-header">Engineered for Household<br>Electricity Suppliers</h3>
+      
+      <div class="content-card">
+        <div class="card-title">Storix ONE</div>
+        <div class="product-image placeholder-img">
+          <!-- Storix ONE image -->
+          <img src="image/Untitled.png" alt="Storix ONE" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+
+        <div class="card-body">
+          <p>Households remain the main customers of electricity companies. Storix ONE for households is carefully engineered to reduce electricity transmission losses when fulfilling residential demand, helping to cut costs for electricity provision companies.</p>
+          
+          <p>To maximize effectiveness, we offer a one-week trial with our <strong>Storix ONE Adaption Mechanism (SOAM)</strong>. With user consent, SOAM monitors electricity usage over the trial week to generate a load profile and suggest an optimal battery configuration (precise to 1kWh), which can be optimized either for one of the following:</p>
+          <ul>
+            <li>Maximum energy savings</li>
+            <li>Maximum energy savings per dollar invested</li>
+          </ul>
+          
+          <p>Storix ONE would be sold to electricity providers with:</p>
+          <ul>
+            <li>An upfront installation fee for us to install the device</li>
+            <li>A monthly charge of 30% verified electricity savings to be given to Storix in credit form. Storix can direct electricity with credits to Storix’s own business partners</li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <div id="panel-scroll" class="panel">
-    <form id="purchase-form" class="card">
-      <h2>Select Configuration</h2>
-      <div class="group">
-        <label>Modules</label>
-        <div class="row">
-          <div class="opt"><input type="checkbox" name="forecast" id="forecast"><label for="forecast">Forecasting</label></div>
-          <div class="opt"><input type="checkbox" name="storage" id="storage"><label for="storage">Storage</label></div>
-          <div class="opt"><input type="checkbox" name="transport" id="transport"><label for="transport">Transport</label></div>
+
+    <!-- Vertical Divider -->
+    <div class="divider"></div>
+
+    <!-- Right Column: Enterprise -->
+    <div class="col right">
+      <h3 class="col-header">Enterprise Grade<br>for Professional Performance</h3>
+      
+      <div class="content-card">
+        <div class="card-title">Storix ONE PRO</div>
+        <div class="product-image placeholder-img">
+          <!-- Storix ONE PRO image -->
+          <img src="image/Untitled1.png" alt="Storix ONE PRO" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+
+        <div class="card-body">
+          <p>Storix ONE PRO is an enterprise-grade battery system that delivers professional performance. It offers a completely configurable battery size to match your load profiles and includes our thermal performance module to deliver consistently excellent performance.</p>
+          
+          <p>Storix ONE PRO is sold with an upfront installation fee with a monthly service charge. Contact sales for pricing and deployment options.</p>
+          
+          <div class="sub-section">
+            <h4>Find Out How Storix ONE PRO Could Be Used</h4>
+            <p>With enterprise grade performance, Storix ONE PRO could be used in a variety of scenarios.</p>
+            
+            <p><strong>Peak Shaving:</strong> Storix ONE PRO could be paired with our Storix Peak-Shaving Model. It can charge during lower-price, offpeak periods and discharge during higher-price peak periods, decreasing costs with time-variable electricity rates.</p>
+            
+            <p><strong>Grid & Infrastructure:</strong> Paired with the Storix Isothermal Model, it can improve grid transmission efficiency, enabling for lower energy loss in existing grid infrastructure. For future infrastructure projects, this boosted efficiency enables cheaper materials to be used during construction without sacrificing overall efficiency, helping to reduce costs of transmission wires by up to 50% in some areas.</p>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <a href="mailto:sales@storix.com" class="btn secondary">Contact Sales</a>
         </div>
       </div>
-      <div class="group">
-        <label>Region tier</label>
-        <div class="row">
-          <div class="opt"><input type="radio" name="region" id="r1" value="1000" checked><label for="r1">Tier 1</label></div>
-          <div class="opt"><input type="radio" name="region" id="r2" value="3000"><label for="r2">Tier 2</label></div>
-          <div class="opt"><input type="radio" name="region" id="r3" value="6000"><label for="r3">Tier 3</label></div>
-        </div>
-      </div>
-      <div class="group">
-        <label>SLA</label>
-        <div class="row">
-          <div class="opt"><input type="radio" name="sla" id="s1" value="1000" checked><label for="s1">Standard</label></div>
-          <div class="opt"><input type="radio" name="sla" id="s2" value="3000"><label for="s2">Enhanced</label></div>
-          <div class="opt"><input type="radio" name="sla" id="s3" value="5000"><label for="s3">Premium</label></div>
-        </div>
-      </div>
-      <div class="cta">
-        <a class="btn" href="#summary">Update summary</a>
-        <a class="btn secondary" href="mailto:yourname@example.com">Contact sales</a>
-      </div>
-      <div class="note">Prices are indicative for demo purposes.</div>
-    </form>
-    <div id="summary" class="summary">
-      <h3>Summary</h3>
-      <div id="breakdown"></div>
-      <div class="total" id="total">$0</div>
-    </div>
     </div>
   </div>
 </div>
